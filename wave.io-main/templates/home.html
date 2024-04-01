@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Wizard</title>
+    <style>
+        /* Shared CSS styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: white;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        #backgroundCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            /* Ensure the canvas is behind other content */
+        }
+
+        .hero {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #352cdd;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            color: #1F2937;
+        }
+
+        .hero button {
+            background-color: #4951c8b9;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .hero button:hover {
+            background-color: #4F46E5;
+        }
+       
+        
+        /* Audio Analysis Styles */
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #eeeeee;
+            border: none;
+            border-radius: 8px;
+        }
+
+        h1,
+        h2 {
+            color: #342E36;
+        }
+
+        input[type="file"] {
+            margin-bottom: 10px;
+            background-color: #33415493;
+            color: white;
+            border: 1px solid #342E36;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        button {
+            background-color: #4951c8b9;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #4F46E5;
+        }
+
+        #analysisContainer {
+            margin-top: 20px;
+            background-color: #F9F9F9;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        #analysisText {
+            background-color: #334154;
+            color: white;
+            padding: 10px;
+            border: 1px solid #7d98c2;
+            border-radius: 5px;
+        }
+        /* Loading spinner */
+.spinner {
+    border: 4px solid rgba(23, 25, 160, 0.649);
+    border-radius: 50%;
+    border-top: 4px solid #fff;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+    margin-top: 20px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+    </style>
+</head>
+
+<body>
+    <canvas id="backgroundCanvas"></canvas>
+    <div id="content">
+        <!-- Welcome Page -->
+        <div class="hero" id="welcomePage">
+            <!-- <h2>Welcome to Wave.io</h2> -->
+            <h1>Welcome to Wave.io</h1>
+            <p>Empower your business with insightful audio analysis and captivating dashboards..</p>
+            <button onclick="navigateToAudioAnalysis()">Start Your Journey</button>
+        </div>
+
+
+        <!-- Audio Analysis Page -->
+        <div class="container" id="audioAnalysisPage" style="display: none; justify-content: center;">
+            <h1>Upload Audio File</h1>
+            <input type="file" id="audioFile" accept="audio/*">
+            <button onclick="uploadAudio()">Upload</button>
+
+            <div id="analysisContainer">
+                <h2>Analysis Results:</h2>
+                <div id="analysisText">Processing Conversation...</div>
+            </div>
+            
+            <!-- Button to navigate to dashboard.html -->
+
+        </div>
+        <!-- <button id="dashboardBtn" onclick="navigateToDashboard()" style="display: none;">Go to Dashboard</button> -->
+        <button id="dashboardBtn" onclick="navigateToDashboard()" style="display: none; margin: 60px auto; display: none;">Go to Dashboard</button>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+        <script>
+            const canvas = document.getElementById('backgroundCanvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const stars = [];
+            const numStars = 900;
+
+            for (let i = 0; i < numStars; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2,
+                    speed: Math.random() * 0.5
+                });
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                for (let i = 0; i < numStars; i++) {
+                    const star = stars[i];
+                    ctx.beginPath();
+                    ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                    ctx.fillStyle = '#4338CA'; // Light green color
+                    ctx.fill();
+                    star.x -= star.speed;
+                    if (star.x < 0) {
+                        star.x = canvas.width;
+                    }
+                }
+
+                requestAnimationFrame(draw);
+            }
+
+            draw();
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+
+            window.addEventListener('resize', resizeCanvas);
+            // Variables to store form data
+            var audioWizard
+
+function navigateToAudioAnalysis() {
+    // Scroll to the audio analysis section
+    document.getElementById('welcomePage').style.display = 'none';
+    document.getElementById('audioAnalysisPage').style.display = 'block';
+    document.getElementById('audioAnalysisPage').scrollIntoView({ behavior: 'smooth' });
+}
+
+function uploadAudio() {
+    var audioFile = document.getElementById('audioFile').files[0];
+    if (audioFile) {
+        // Display loading spinner
+        document.getElementById('analysisText').innerHTML = '<div class="spinner"></div><p>Uploading audio...</p>';
+
+        // Simulating analysis completion after 3 seconds
+        setTimeout(function () {
+            console.log(audioFile);
+            var formData = new FormData();
+            formData.append("audioFile", audioFile);
+
+            var csrftoken = getCookie('csrftoken');
+
+            $.ajax({
+                url: "/",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    "X-CSRFToken": csrftoken
+                },
+                success: function (response) {
+                    console.log(response['conversation']);
+                    document.getElementById("analysisText").innerText = response['conversation'];
+                    // Show the button to navigate to the dashboard
+                    document.getElementById("dashboardBtn").style.display = "block";
+                    console.log("File uploaded successfully");
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error uploading file: " + error);
+                }
+            });
+
+            var analysisText = "Analysing audio conversation......";
+            document.getElementById('analysisText').innerText = analysisText;
+        }, 3000);
+    } else {
+        alert('Please select an audio file to upload.');
+    }
+}
+
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Define function to navigate to dashboard.html
+function navigateToDashboard() {
+    window.location.href = "dashboard";
+}
+</script>
+</div>
+</body>
+
+</html>
